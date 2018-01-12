@@ -35,6 +35,8 @@ public class SocketConnection implements Runnable{
     public void run() {
     	
 			try {
+				System.out.println("Estableciendo conexión con el servidor web...");
+				
 				socket = IO.socket( PropertiesUtils.getServerURL() );
 				socket.on("testResp", new Emitter.Listener() {
 					
@@ -50,8 +52,9 @@ public class SocketConnection implements Runnable{
 				
 				socket.connect();
 				
+				System.out.println("Conexión establecida.");
+				
 			} catch (URISyntaxException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
     }
@@ -63,10 +66,11 @@ public class SocketConnection implements Runnable{
 			String json = objectMapper.writeValueAsString(s);
 			
 			socket.emit("test", json);
-			
+			System.out.println(json);
 		} catch (JsonProcessingException e) {
 			e.printStackTrace();
 		}
     	
     }
+    
 }

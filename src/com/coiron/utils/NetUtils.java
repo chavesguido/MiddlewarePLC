@@ -15,7 +15,6 @@ import java.util.regex.Pattern;
 public class NetUtils {
 
 	private static final String IPV4_REGEX = "(([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\.){3}([01]?\\d\\d?|2[0-4]\\d|25[0-5])";
-	private static final String URL_NAME = "/awp/App.html";
 	
 	private static List<String> getLocalIPs() throws Exception {
 		List<String> ips = new ArrayList<String>();
@@ -44,23 +43,30 @@ public class NetUtils {
 	}
 
 	public static List<String> getPLCIPs() throws Exception {
-		List<String> localIps = getLocalIPs();
-		List<String> PLCIps = new ArrayList<String>();
 		
-		for(String ip : localIps) {
-			System.out.println("\n scanning " + ip);
-			try {
-				if(!getHTML("http://" + ip + URL_NAME).isEmpty()) {
-					PLCIps.add(ip);
-					System.out.println(ip + " is an plc IP");					
-				}
-
-			} catch (Exception e) {
-				System.out.println(ip + " not plc IP");
-			}
-		}
+		List<String> a = new ArrayList<String>();
+		a.add("192.168.0.123");
+		a.add("192.168.0.125");
+		a.add("192.168.0.127");
+		return a;
 		
-		return PLCIps;
+//		List<String> localIps = getLocalIPs();
+//		List<String> PLCIps = new ArrayList<String>();
+//		
+//		for(String ip : localIps) {
+//			System.out.println("\n scanning " + ip);
+//			try {
+//				if(!getHTML("http://" + ip + Properties.getURLWEBSERVER).isEmpty()) {
+//					PLCIps.add(ip);
+//					System.out.println(ip + " is an plc IP");					
+//				}
+//
+//			} catch (Exception e) {
+//				System.out.println(ip + " not plc IP");
+//			}
+//		}
+//		
+//		return PLCIps;
 	}
 
 	private static String getHTML(String urlToRead) throws Exception {

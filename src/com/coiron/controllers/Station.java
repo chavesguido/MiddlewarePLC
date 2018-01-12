@@ -3,14 +3,21 @@ package com.coiron.controllers;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.concurrent.TimeUnit;
 
+import com.coiron.connections.NetConnection;
 import com.coiron.connections.SocketConnection;
 import com.coiron.model.PLC;
 import com.coiron.utils.NetUtils;
 import com.coiron.utils.PropertiesUtils;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
-public class Station implements Runnable{
+public class Station {
+	@JsonIgnore
 	private static Station instance = null;
+	@JsonIgnore
+	public final static Object obj = new Object();
+
 	
 	private String clientID = PropertiesUtils.getClientID();
 	private List<PLC> plcs = new ArrayList<PLC>();
@@ -24,10 +31,11 @@ public class Station implements Runnable{
 		return instance;
 	}
 	
-	@Override
 	public void run() {
 		
 		searchPLCS();
+		
+		new Thread(SocketConnection.getInstance(), "socket").start();
 		
 		PLCSToServer();
 		
@@ -36,22 +44,34 @@ public class Station implements Runnable{
 	private void searchPLCS(){
 		
 		try {
+			System.out.println("Detectando PLC en la red...");
 			
-			for(String ip : NetUtils.getPLCIPs()){
+			List<String> PLC_IPs = NetUtils.getPLCIPs();
+			
+			System.out.println(PLC_IPs.size() + " PLC encontrados en la red.");
+			
+			for(String ip : PLC_IPs){
+				
+				System.out.println("Sincronizando PLC con IP " + ip);
+				
 				PLC p = new PLC();
 				
 				p.setIp(ip);
+				p.setWebserver(
+						new NetConnection(ip + PropertiesUtils.getPLCAdminURL(),
+											"", "", "")
+						);
 				plcs.add(p);
 				
-				//ACA VAN METODOS PARA CONSEGUIR EL ID Y LAS VARIABLES DEL PLC CONECTANDOSE AL HTML
-				getPLCSId();
-				synchronizePLCS();
+				//ACA VA METODO PARA CONSEGUIR EL ID DEL PLC CONECTANDOSE AL HTML
+//				getPLCId();
 			}
+			
+			System.out.println("PLC sincronizados.");
 			
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		
 	}
 	
 	private void PLCSToServer() {
@@ -60,11 +80,13 @@ public class Station implements Runnable{
 			
 			try {
 				
+				synchronized (obj) {
+					TimeUnit.SECONDS.sleep(5);
+				}
+				
 				synchronizePLCS();
 				
 				SocketConnection.getInstance().sendPLCSLikeJSON(this);
-				
-				this.wait(5000);
 				
 			} catch (InterruptedException e) {
 				e.printStackTrace();
@@ -74,12 +96,25 @@ public class Station implements Runnable{
 	}
 	
 	
+	private void synchronizePLCS() {
+		try {
+			
+			for (PLC p : plcs)
+				p.synchronize();
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
+	
 	public void updatePLC( String idPLC, Entry<String, String> variable ) {
 		
 		for(PLC p : plcs)
 			if(p.getId().equals(idPLC))
 				p.getVariables().put( variable.getKey(), variable.getValue() );
 		
+		//TODO
 		//NETUTILS UPDATE ¿INDIVIDUAL O DE A MUCHAS VARIABLES? UN FORM GENERAL O UN FORM POR VARIABLE?
 	}
 
