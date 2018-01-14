@@ -10,7 +10,9 @@ import java.net.URL;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
+
 import javax.net.ssl.HttpsURLConnection;
+
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -75,21 +77,13 @@ public class NetConnection {
 		return response.toString();
 	}
 	
-	private String login() throws Exception {
-		// make sure cookies is turn on
-		CookieHandler.setDefault(new CookieManager());
-
-		// 1. Send a "GET" request, so that you can extract the form's data.
-		String page = getPageContent(loginURL);
-		String postParams = getFormParams(page, PropertiesUtils.getUsernamePLC(), PropertiesUtils.getPasswordPLC(),
-											loginFormID, usernameFormName, passwordFormName);
-
-		// 2. Construct above post's content and then send a POST request for
-		// authentication
-		return sendPost(loginURL, postParams);
-	}
-
-	private String sendPost(String url, String postParams) throws Exception {
+	/**
+	 * Send a HTTP POST to a url.
+	 * Example of postParams format is:
+	 * key1=value1&key2=value2&...&keyN=valueN
+	 * 
+	 */
+	public String sendPost(String url, String postParams) throws Exception {
 
 		URL obj = new URL(url);
 		conn = (HttpsURLConnection) obj.openConnection();
@@ -129,6 +123,20 @@ public class NetConnection {
 		this.cookies = conn.getHeaderFields().get("Set-Cookie");
 		
 		return response.toString();
+	}
+	
+	private String login() throws Exception {
+		// make sure cookies is turn on
+		CookieHandler.setDefault(new CookieManager());
+
+		// 1. Send a "GET" request, so that you can extract the form's data.
+		String page = getPageContent(loginURL);
+		String postParams = getFormParams(page, PropertiesUtils.getUsernamePLC(), PropertiesUtils.getPasswordPLC(),
+											loginFormID, usernameFormName, passwordFormName);
+
+		// 2. Construct above post's content and then send a POST request for
+		// authentication
+		return sendPost(loginURL, postParams);
 	}
 
 	private String getFormParams(String html, String username, String password, String formID, String usernameInputName,

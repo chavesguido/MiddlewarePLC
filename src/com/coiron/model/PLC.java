@@ -14,7 +14,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 public class PLC {
 
-	private String id;
+	private String idPlc;
 	@JsonIgnore
 	private String ip;
 	@JsonIgnore
@@ -25,11 +25,12 @@ public class PLC {
 		variables = new HashMap<String, String>();
 	}
 	
-	public String getId() {
-		return id;
+	
+	public String getIdPlc() {
+		return idPlc;
 	}
-	public void setId(String id) {
-		this.id = id;
+	public void setIdPlc(String idPlc) {
+		this.idPlc = idPlc;
 	}
 	public String getIp() {
 		return ip;
@@ -70,6 +71,15 @@ public class PLC {
 //		}
 		
 		
+	}
+
+	public void updateWebServer(String key) throws Exception {
+		String value = this.variables.get(key);
+		
+		String url = this.ip + PropertiesUtils.getPLCWebServerURL();
+		String postParams = key + "=" + value;
+		
+		this.webserver.sendPost(url, postParams);
 	}
 	
 	

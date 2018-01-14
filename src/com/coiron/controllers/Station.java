@@ -17,6 +17,8 @@ public class Station {
 	private static Station instance = null;
 	@JsonIgnore
 	public final static Object obj = new Object();
+	@JsonIgnore
+	private boolean synchronizing = false;
 
 	
 	private String clientID = PropertiesUtils.getClientID();
@@ -76,23 +78,25 @@ public class Station {
 	
 	private void PLCSToServer() {
 		
+		synchronizing = true;
+		
 		while(true){
-			
-			try {
-				
-				synchronized (obj) {
-					TimeUnit.SECONDS.sleep(5);
+			if(synchronizing) {
+				try {
+					
+					synchronized (obj) {
+						TimeUnit.SECONDS.sleep(5);
+					}
+					
+					synchronizePLCS();
+					
+					SocketConnection.getInstance().sendPLCSLikeJSON(this);
+					
+				} catch (InterruptedException e) {
+					e.printStackTrace();
 				}
-				
-				synchronizePLCS();
-				
-				SocketConnection.getInstance().sendPLCSLikeJSON(this);
-				
-			} catch (InterruptedException e) {
-				e.printStackTrace();
 			}
 		}
-		
 	}
 	
 	
@@ -109,13 +113,27 @@ public class Station {
 	
 	
 	public void updatePLC( String idPLC, Entry<String, String> variable ) {
+		synchronizing = false;
+		
+		PLC plc = null;
 		
 		for(PLC p : plcs)
-			if(p.getId().equals(idPLC))
-				p.getVariables().put( variable.getKey(), variable.getValue() );
+			if(p.getIdPlc().equals(idPLC))
+				plc = p;
 		
-		//TODO
-		//NETUTILS UPDATE ¿INDIVIDUAL O DE A MUCHAS VARIABLES? UN FORM GENERAL O UN FORM POR VARIABLE?
+		if(plc == null) return;
+		
+		plc.getVariables().put( variable.getKey(), variable.getValue() );
+		
+		try {
+			
+			plc.updateWebServer(variable.getKey());
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		synchronizing = true;
 	}
 
 	

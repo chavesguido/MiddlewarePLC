@@ -38,7 +38,7 @@ public class SocketConnection implements Runnable{
 				System.out.println("Estableciendo conexión con el servidor web...");
 				
 				socket = IO.socket( PropertiesUtils.getServerURL() );
-				socket.on("testResp", new Emitter.Listener() {
+				socket.on("editarVariables", new Emitter.Listener() {
 					
 					public void call(Object... arg0) {
 						//TODO
@@ -46,6 +46,8 @@ public class SocketConnection implements Runnable{
 						//TODO
 						for(Object o : arg0)
 							System.out.println((String)o.toString());
+						
+						
 					}
 					
 				});
@@ -65,8 +67,8 @@ public class SocketConnection implements Runnable{
     	try {
 			String json = objectMapper.writeValueAsString(s);
 			
-			socket.emit("test", json);
-			System.out.println(json);
+			socket.emit("envioVariables", json);
+//			System.out.println(json);
 		} catch (JsonProcessingException e) {
 			e.printStackTrace();
 		}
