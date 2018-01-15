@@ -39,6 +39,7 @@ public class NetConnection {
 		this.usernameFormName = usernameFormName;
 		this.passwordFormName = passwordFormName;
 
+		//TODO
 //		login();
 	}
 	

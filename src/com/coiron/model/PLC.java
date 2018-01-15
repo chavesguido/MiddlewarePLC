@@ -2,19 +2,14 @@ package com.coiron.model;
 
 import java.util.HashMap;
 import java.util.Map;
-
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
-
+import java.util.Set;
 import com.coiron.connections.NetConnection;
 import com.coiron.utils.PropertiesUtils;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 public class PLC {
 
-	private String idPlc;
+	private String id;
 	@JsonIgnore
 	private String ip;
 	@JsonIgnore
@@ -25,12 +20,11 @@ public class PLC {
 		variables = new HashMap<String, String>();
 	}
 	
-	
-	public String getIdPlc() {
-		return idPlc;
+	public String getId() {
+		return id;
 	}
-	public void setIdPlc(String idPlc) {
-		this.idPlc = idPlc;
+	public void setId(String id) {
+		this.id = id;
 	}
 	public String getIp() {
 		return ip;
@@ -51,6 +45,8 @@ public class PLC {
 		this.webserver = webserver;
 	}
 	public void synchronize() throws Exception {
+		
+		//TODO
 		this.variables.put("key1", "value1");
 		this.variables.put("key2", "value2");
 		this.variables.put("key3", "value3");
@@ -73,13 +69,21 @@ public class PLC {
 		
 	}
 
-	public void updateWebServer(String key) throws Exception {
-		String value = this.variables.get(key);
-		
+	public void updateWebServer(Set<String> keys) throws Exception {
 		String url = this.ip + PropertiesUtils.getPLCWebServerURL();
-		String postParams = key + "=" + value;
+		String postParams = "";
 		
-		this.webserver.sendPost(url, postParams);
+		for(String key : keys) {
+			
+			String value = this.variables.get(key);
+			postParams += key + "=" + value + "&";
+		}
+		
+		postParams = postParams.substring(0, postParams.length() - 1);
+		
+		//TODO
+		System.out.println("POST a " + url + " con parametros " + postParams);
+//		this.webserver.sendPost(url, postParams);
 	}
 	
 	

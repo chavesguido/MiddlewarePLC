@@ -2,6 +2,7 @@ package com.coiron.controllers;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
 
@@ -11,6 +12,7 @@ import com.coiron.model.PLC;
 import com.coiron.utils.NetUtils;
 import com.coiron.utils.PropertiesUtils;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class Station {
 	@JsonIgnore
@@ -67,6 +69,9 @@ public class Station {
 				
 				//ACA VA METODO PARA CONSEGUIR EL ID DEL PLC CONECTANDOSE AL HTML
 //				getPLCId();
+				//SOLO PARA TEST, BORRAR
+				//TODO GET PLC ID
+				p.setId("plc1");
 			}
 			
 			System.out.println("PLC sincronizados.");
@@ -112,28 +117,32 @@ public class Station {
 	}
 	
 	
-	public void updatePLC( String idPLC, Entry<String, String> variable ) {
+	public void updatePLC( String idPLC, Map<String, String> variables ) {
 		synchronizing = false;
 		
-		PLC plc = null;
+		if(idPLC == null || variables == null) return;
 		
-		for(PLC p : plcs)
-			if(p.getIdPlc().equals(idPLC))
-				plc = p;
+		PLC plcLocal = getPlcById(idPLC);
 		
-		if(plc == null) return;
-		
-		plc.getVariables().put( variable.getKey(), variable.getValue() );
+		for(Entry<String, String> v : variables.entrySet()) 
+			plcLocal.getVariables().put( v.getKey(), v.getValue() );
 		
 		try {
 			
-			plc.updateWebServer(variable.getKey());
+			plcLocal.updateWebServer( plcLocal.getVariables().keySet() );
 			
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		
 		synchronizing = true;
+	}
+	
+	public PLC getPlcById(String id) {
+		for(PLC p : plcs)
+			if(p.getId().equals(id))
+				return p;
+		return null;
 	}
 
 	

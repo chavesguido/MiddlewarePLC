@@ -1,10 +1,13 @@
 package com.coiron.connections;
 
+import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.URISyntaxException;
+import java.util.Map.Entry;
 
 import com.coiron.controllers.Station;
+import com.coiron.model.PLC;
 import com.coiron.utils.PropertiesUtils;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -41,13 +44,18 @@ public class SocketConnection implements Runnable{
 				socket.on("editarVariables", new Emitter.Listener() {
 					
 					public void call(Object... arg0) {
-						//TODO
-						//TODO
-						//TODO
-						for(Object o : arg0)
-							System.out.println((String)o.toString());
-						
-						
+						try {
+							ObjectMapper objectMapper = new ObjectMapper();
+							
+							PLC plcServer = objectMapper.readValue(arg0[0].toString(), PLC.class);
+							
+							if(plcServer == null) return;
+
+							Station.getInstance().updatePLC(plcServer.getId(), plcServer.getVariables());
+							
+						} catch (IOException e) {
+							e.printStackTrace();
+						}
 					}
 					
 				});
@@ -68,7 +76,6 @@ public class SocketConnection implements Runnable{
 			String json = objectMapper.writeValueAsString(s);
 			
 			socket.emit("envioVariables", json);
-//			System.out.println(json);
 		} catch (JsonProcessingException e) {
 			e.printStackTrace();
 		}

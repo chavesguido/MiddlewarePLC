@@ -44,6 +44,8 @@ public class NetUtils {
 
 	public static List<String> getPLCIPs() throws Exception {
 		
+		//TODO
+		
 		List<String> a = new ArrayList<String>();
 		a.add("192.168.0.123");
 		a.add("192.168.0.125");
