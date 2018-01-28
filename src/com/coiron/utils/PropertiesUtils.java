@@ -10,6 +10,7 @@ public class PropertiesUtils {
 	
 	private static String serverURL = null;
 	private static String clientID = null;
+	private static String frigName = null;
 	private static String usernamePLC = null;
 	private static String passwordPLC = null;
 	private static String PLCAdminURL = null;
@@ -27,6 +28,13 @@ public class PropertiesUtils {
 			clientID = readProperty("clientID");
 		}
 		return clientID;
+	}
+	
+	public static String getFrigName() {
+		if(frigName == null) {
+			frigName = readProperty("frigName");
+		}
+		return frigName;
 	}
 	
 	public static String getUsernamePLC() {

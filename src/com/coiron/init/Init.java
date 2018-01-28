@@ -13,12 +13,11 @@ import com.coiron.model.PLC;
 public class Init{
 
 	public static void main(String[] args){
-		test();
+//		test();
 		Station.getInstance().run();
 		
 	}
 	
-	//TODO
 	static void test() {
 		Thread t = new Thread() {
 		    public void run() {

@@ -24,6 +24,7 @@ public class Station {
 
 	
 	private String clientID = PropertiesUtils.getClientID();
+	private String frigName = PropertiesUtils.getFrigName();
 	private List<PLC> plcs = new ArrayList<PLC>();
 	
 	private Station() {}
@@ -95,7 +96,8 @@ public class Station {
 					
 					synchronizePLCS();
 					
-					SocketConnection.getInstance().sendPLCSLikeJSON(this);
+					//TODO
+//					SocketConnection.getInstance().sendPLCSLikeJSON(this);
 					
 				} catch (InterruptedException e) {
 					e.printStackTrace();
@@ -123,6 +125,8 @@ public class Station {
 		if(idPLC == null || variables == null) return;
 		
 		PLC plcLocal = getPlcById(idPLC);
+		
+		if(plcLocal == null) return;
 		
 		for(Entry<String, String> v : variables.entrySet()) 
 			plcLocal.getVariables().put( v.getKey(), v.getValue() );
@@ -152,5 +156,9 @@ public class Station {
 	public List<PLC> getPlcs() {
 		return plcs;
 	}
+	public String getFrigName() {
+		return frigName;
+	}
+	
 	
 }

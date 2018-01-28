@@ -22,10 +22,10 @@ import com.coiron.utils.PropertiesUtils;
 
 public class NetConnection {
 
-	private String loginURL = "https://www.facebook.com/login.php";
-	private String loginFormID = "login_form";
-	private String usernameFormName = "email";
-	private String passwordFormName = "pass";
+	private String loginURL;
+	private String loginFormID;
+	private String usernameFormName;
+	private String passwordFormName;
 	
 	private List<String> cookies = new ArrayList<String>();
 	private HttpsURLConnection conn;
@@ -39,8 +39,7 @@ public class NetConnection {
 		this.usernameFormName = usernameFormName;
 		this.passwordFormName = passwordFormName;
 
-		//TODO
-//		login();
+		login();
 	}
 	
 	public String getPageContent(String url) throws Exception {
@@ -85,7 +84,7 @@ public class NetConnection {
 	 * 
 	 */
 	public String sendPost(String url, String postParams) throws Exception {
-
+		System.out.println("Enviando HTTP POST.");
 		URL obj = new URL(url);
 		conn = (HttpsURLConnection) obj.openConnection();
 
@@ -123,6 +122,7 @@ public class NetConnection {
 
 		this.cookies = conn.getHeaderFields().get("Set-Cookie");
 		
+		System.out.println("HTTP POST enviado.");
 		return response.toString();
 	}
 	

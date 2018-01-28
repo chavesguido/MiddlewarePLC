@@ -50,9 +50,15 @@ public class SocketConnection implements Runnable{
 							PLC plcServer = objectMapper.readValue(arg0[0].toString(), PLC.class);
 							
 							if(plcServer == null) return;
-
-							Station.getInstance().updatePLC(plcServer.getId(), plcServer.getVariables());
 							
+//							System.out.println("mensaje del servidor: " + plcServer.toString());
+							
+							//TODO
+//							Station.getInstance().updatePLC(plcServer.getId(), plcServer.getVariables());
+							
+							
+							//TODO
+							socket.emit("resp", "editado");
 						} catch (IOException e) {
 							e.printStackTrace();
 						}

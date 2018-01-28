@@ -44,31 +44,33 @@ public class NetUtils {
 
 	public static List<String> getPLCIPs() throws Exception {
 		
-		//TODO
 		
-		List<String> a = new ArrayList<String>();
-		a.add("192.168.0.123");
-		a.add("192.168.0.125");
-		a.add("192.168.0.127");
-		return a;
+//		List<String> a = new ArrayList<String>();
+//		a.add("192.168.0.123");
+//		a.add("192.168.0.125");
+//		a.add("192.168.0.127");
+//		return a;
 		
-//		List<String> localIps = getLocalIPs();
-//		List<String> PLCIps = new ArrayList<String>();
-//		
-//		for(String ip : localIps) {
-//			System.out.println("\n scanning " + ip);
-//			try {
-//				if(!getHTML("http://" + ip + Properties.getURLWEBSERVER).isEmpty()) {
-//					PLCIps.add(ip);
-//					System.out.println(ip + " is an plc IP");					
-//				}
-//
-//			} catch (Exception e) {
-//				System.out.println(ip + " not plc IP");
-//			}
-//		}
-//		
-//		return PLCIps;
+		List<String> localIps = getLocalIPs();
+		List<String> PLCIps = new ArrayList<String>();
+		
+		for(String ip : localIps) {
+			System.out.println("\n scanning " + ip);
+			try {
+				String loginHTML = getHTML("http://" + ip + PropertiesUtils.getPLCAdminURL());
+				if(loginHTML.contains("Portal") || loginHTML.contains("Siemens")) {
+					PLCIps.add(ip);
+					System.out.println(ip + " is a plc IP");					
+				}else {
+					System.out.println(ip + " not a plc IP");
+				}
+
+			} catch (Exception e) {
+				System.out.println(ip + " not a plc IP");
+			}
+		}
+		
+		return PLCIps;
 	}
 
 	private static String getHTML(String urlToRead) throws Exception {
