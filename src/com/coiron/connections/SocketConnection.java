@@ -85,7 +85,18 @@ public class SocketConnection implements Runnable{
 		} catch (JsonProcessingException e) {
 			e.printStackTrace();
 		}
+    }
+    
+    public void deletePLC(PLC p) {
+    	ObjectMapper objectMapper = new ObjectMapper();
     	
+    	try {
+			String json = objectMapper.writeValueAsString(p);
+			
+			socket.emit("plcOffline", json);
+		} catch (JsonProcessingException e) {
+			e.printStackTrace();
+		}
     }
     
 }

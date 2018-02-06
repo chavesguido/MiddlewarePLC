@@ -106,15 +106,20 @@ public class Station {
 		}
 	}
 	
-	
 	private void synchronizePLCS() {
-		try {
+		for (PLC p : plcs) {
 			
-			for (PLC p : plcs)
+			try {
 				p.synchronize();
+			} catch (Exception e){
+				
+				if(e.getMessage().equalsIgnoreCase("DELETE PLC")) {
+					SocketConnection.getInstance().deletePLC(p);
+				}
+				else e.printStackTrace();
+				
+			}
 			
-		} catch (Exception e) {
-			e.printStackTrace();
 		}
 	}
 	

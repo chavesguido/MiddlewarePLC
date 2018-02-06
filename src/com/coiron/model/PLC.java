@@ -68,10 +68,14 @@ public class PLC {
 //		this.variables.put("key3", "value3");
 //		this.variables.put("key4", "value4");
 		
-		if( webserver == null)
+		if(webserver == null)
 			login();
 		
 		String html = this.webserver.getPageContent( this.ip + PropertiesUtils.getPLCWebServerURL() );
+		
+		if( !html.contains("PLC WebServer") ) {
+			throw new Exception("DELETE PLC");
+		}
 
 		Document doc = Jsoup.parse(html);
 
