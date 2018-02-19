@@ -2,6 +2,7 @@ package com.coiron.model;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 
 import org.jsoup.Jsoup;
@@ -22,14 +23,16 @@ public class PLC {
 	private NetConnection webserver = null;
 	private Map<String, String> variables = null;
 	
-	public PLC() {
+	public PLC(String ip) {
 		try {
 			variables = new HashMap<String, String>();
+			this.ip = "http://" + ip;
+			login();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
-	
+
 	public String getId() {
 		return id;
 	}
@@ -57,17 +60,21 @@ public class PLC {
 	
 	public void login() throws Exception {
 		if(ip != null)
-			webserver = new NetConnection(ip + PropertiesUtils.getPLCAdminURL(), "Login_Area_Form", "Login", "Password");
+			webserver = new NetConnection(ip + PropertiesUtils.getPLCAdminURL(),
+					PropertiesUtils.getFormId(),
+					PropertiesUtils.getUsernamePLC(),
+					PropertiesUtils.getPasswordPLC());
 	}
 	
 	
 	public void synchronize() throws Exception {
 		
-//		this.variables.put("key1", "value1");
-//		this.variables.put("key2", "value2");
-//		this.variables.put("key3", "value3");
-//		this.variables.put("key4", "value4");
+//		this.variables.put("Temperatura", String.valueOf( (Math.random() * 10) + 12 ));
+//		this.variables.put("Luz", String.valueOf( (Math.random() * 50) + 250 ));
+//		this.variables.put("Evaporación mínima", String.valueOf( (Math.random() * 100) + 800 ));
+//		this.variables.put("Evaporación máxima", String.valueOf( (Math.random() * 100) + 400 ));
 		
+		System.out.println("sincronizando plc " + this.ip);
 		if(webserver == null)
 			login();
 		
@@ -88,7 +95,10 @@ public class PLC {
 			this.variables.put(key, value);
 		}
 		
-		System.out.println(this.variables.toString());
+		
+		
+		//System.out.println(this.variables.toString());
+		
 	}
 
 	public void updateWebServer(Set<String> keys) throws Exception {

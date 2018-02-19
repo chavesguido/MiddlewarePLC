@@ -6,12 +6,11 @@ import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.CookieHandler;
 import java.net.CookieManager;
+import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
-
-import javax.net.ssl.HttpsURLConnection;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -28,7 +27,7 @@ public class NetConnection {
 	private String passwordFormName;
 	
 	private List<String> cookies = new ArrayList<String>();
-	private HttpsURLConnection conn;
+	private HttpURLConnection conn;
 
 	private final String USER_AGENT = "Mozilla/5.0";
 	
@@ -39,13 +38,14 @@ public class NetConnection {
 		this.usernameFormName = usernameFormName;
 		this.passwordFormName = passwordFormName;
 
-		login();
+		//TODO DESCOMENT
+		//login();
 	}
 	
 	public String getPageContent(String url) throws Exception {
 
 		URL obj = new URL(url);
-		conn = (HttpsURLConnection) obj.openConnection();
+		conn = (HttpURLConnection) obj.openConnection();
 
 		// default is GET
 		conn.setRequestMethod("GET");
@@ -86,7 +86,7 @@ public class NetConnection {
 	public String sendPost(String url, String postParams) throws Exception {
 		System.out.println("Enviando HTTP POST.");
 		URL obj = new URL(url);
-		conn = (HttpsURLConnection) obj.openConnection();
+		conn = (HttpURLConnection) obj.openConnection();
 
 		// Acts like a browser
 		conn.setUseCaches(false);

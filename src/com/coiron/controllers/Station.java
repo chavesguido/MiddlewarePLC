@@ -59,13 +59,7 @@ public class Station {
 				
 				System.out.println("Sincronizando PLC con IP " + ip);
 				
-				PLC p = new PLC();
-				
-				p.setIp(ip);
-				p.setWebserver(
-						new NetConnection(ip + PropertiesUtils.getPLCAdminURL(),
-											"", "", "")
-						);
+				PLC p = new PLC(ip);
 				plcs.add(p);
 				
 				//ACA VA METODO PARA CONSEGUIR EL ID DEL PLC CONECTANDOSE AL HTML
@@ -74,6 +68,18 @@ public class Station {
 				//TODO GET PLC ID
 				p.setId("plc1");
 			}
+			
+			
+			//TODO MOCK PLC DELETE
+			//MOCK PLC
+			System.out.println("Sincronizando PLC con IP localhost:4200");
+			PLC p = new PLC("127.0.0.1:4200");
+			plcs.add(p);
+			p.setId("plc1");
+			//MOCK PLC
+			
+			
+			
 			
 			System.out.println("PLC sincronizados.");
 			
@@ -96,8 +102,7 @@ public class Station {
 					
 					synchronizePLCS();
 					
-					//TODO
-//					SocketConnection.getInstance().sendPLCSLikeJSON(this);
+					SocketConnection.getInstance().sendPLCSLikeJSON(this);
 					
 				} catch (InterruptedException e) {
 					e.printStackTrace();

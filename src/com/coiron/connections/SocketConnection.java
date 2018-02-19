@@ -45,13 +45,15 @@ public class SocketConnection implements Runnable{
 					
 					public void call(Object... arg0) {
 						try {
+							System.out.println("editando variables...");
+							
 							ObjectMapper objectMapper = new ObjectMapper();
 							
 							PLC plcServer = objectMapper.readValue(arg0[0].toString(), PLC.class);
 							
 							if(plcServer == null) return;
 							
-//							System.out.println("mensaje del servidor: " + plcServer.toString());
+							System.out.println("mensaje del servidor: " + plcServer.toString());
 							
 							//TODO
 //							Station.getInstance().updatePLC(plcServer.getId(), plcServer.getVariables());
@@ -81,6 +83,8 @@ public class SocketConnection implements Runnable{
     	try {
 			String json = objectMapper.writeValueAsString(s);
 			
+			
+			System.out.println("Enviando al servidor mensaje:" + json);
 			socket.emit("envioVariables", json);
 		} catch (JsonProcessingException e) {
 			e.printStackTrace();

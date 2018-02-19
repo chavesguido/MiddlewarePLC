@@ -13,6 +13,7 @@ public class PropertiesUtils {
 	private static String frigName = null;
 	private static String usernamePLC = null;
 	private static String passwordPLC = null;
+	private static String formId = null;
 	private static String PLCAdminURL = null;
 	private static String PLCWebServerURL = null;
 	
@@ -47,6 +48,13 @@ public class PropertiesUtils {
 	public static String getPasswordPLC() {
 		if(passwordPLC == null) {
 			passwordPLC = readProperty("passwordPLC");
+		}
+		return passwordPLC;
+	}
+	
+	public static String getFormId() {
+		if(passwordPLC == null) {
+			passwordPLC = readProperty("formId");
 		}
 		return passwordPLC;
 	}
@@ -86,7 +94,7 @@ public class PropertiesUtils {
 			value = prop.getProperty(name);
 			
 			if(value == null) {
-				System.out.println("No se ha encontrado la propiedad: " + filename + ". Asegurese de que el archivo " + filename + " esté bien configurado.\nPresione enter para cerrar.");
+				System.out.println("No se ha encontrado la propiedad: " + name + ". Asegurese de que el archivo " + filename + " esté bien configurado.\nPresione enter para cerrar.");
 				System.in.read();
 				System.exit(0);
 			}
