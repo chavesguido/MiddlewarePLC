@@ -3,6 +3,7 @@ package com.coiron.model;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Random;
 import java.util.Set;
 
 import org.jsoup.Jsoup;
@@ -90,7 +91,13 @@ public class PLC {
 		
 		for(Element variableElement : variableElements) {
 			String key = variableElement.getElementsByClass("key").get(0).text();
-			String value = variableElement.getElementsByClass("value").get(0).text();
+			String value = 	String.valueOf(
+								Integer.parseInt(
+										variableElement.getElementsByClass("value").get(0).text()
+									)
+								+
+								(new Random().nextInt(20))
+							);
 			
 			this.variables.put(key, value);
 		}
