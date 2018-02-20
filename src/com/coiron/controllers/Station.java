@@ -72,7 +72,7 @@ public class Station {
 			
 			//TODO MOCK PLC DELETE
 			//MOCK PLC
-			System.out.println("Sincronizando PLC con IP localhost:4200");
+			System.out.println("Sincronizando PLC con IP 127.0.0.1:4200");
 			PLC p = new PLC("127.0.0.1:4200");
 			plcs.add(p);
 			p.setId("plc1");
