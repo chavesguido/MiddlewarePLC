@@ -5,6 +5,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.URISyntaxException;
 import java.util.Map.Entry;
+import java.util.concurrent.TimeUnit;
 
 import com.coiron.controllers.Station;
 import com.coiron.model.PLC;
@@ -19,11 +20,14 @@ import io.socket.emitter.Emitter;
 
 public class SocketConnection implements Runnable{
 	private static SocketConnection instance = null;
+	public final static Object obj = new Object();
 	
     Socket socket;
     ObjectOutputStream out;
     ObjectInputStream in;
     String message;
+    Boolean connected = false;
+    
     
     private SocketConnection(){}
     
@@ -36,6 +40,7 @@ public class SocketConnection implements Runnable{
     
     @Override
     public void run() {
+    	while(!connected) {
     	
 			try {
 				System.out.println("Estableciendo conexión con el servidor web...");
@@ -45,19 +50,17 @@ public class SocketConnection implements Runnable{
 					
 					public void call(Object... arg0) {
 						try {
-							System.out.println("editando variables...");
-							
 							ObjectMapper objectMapper = new ObjectMapper();
 							
-							PLC plcServer = objectMapper.readValue(arg0[0].toString(), PLC.class);
+							System.out.println("Editando variable... " + arg0[0].toString());
 							
+							PLC plcServer = objectMapper.readValue(arg0[0].toString(), PLC.class);
+
 							if(plcServer == null) return;
 							
 							System.out.println("mensaje del servidor: " + plcServer.toString());
 							
-							//TODO
-//							Station.getInstance().updatePLC(plcServer.getId(), plcServer.getVariables());
-							
+							Station.getInstance().updatePLC(plcServer.getId(), plcServer.getVariables());
 							
 							//TODO
 							socket.emit("resp", "editado");
@@ -68,13 +71,41 @@ public class SocketConnection implements Runnable{
 					
 				});
 				
+				
+				socket.on("conectado", new Emitter.Listener() {
+					public void call(Object... arg0) {
+						connected = true;
+						System.out.println("Socket conectado.");
+					}
+				});
+				
 				socket.connect();
 				
-				System.out.println("Conexión establecida.");
+				synchronized (obj) {
+					try {
+						TimeUnit.SECONDS.sleep(3);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+				}
+				
+				if(connected) {
+					System.out.println("Conexión establecida.");
+				}else {
+					System.out.println("\nNo se pudo establecer conexión. Reintentando.");
+					socket.disconnect();
+					socket = null;
+				}
 				
 			} catch (URISyntaxException e) {
 				e.printStackTrace();
 			}
+			
+			
+			
+			
+			
+    	}
     }
     
     public void sendPLCSLikeJSON(Station s) {
@@ -84,7 +115,7 @@ public class SocketConnection implements Runnable{
 			String json = objectMapper.writeValueAsString(s);
 			
 			
-			System.out.println("Enviando al servidor mensaje:" + json);
+			System.out.println("Enviando al servidor plcs de " + s.getClientID() + " - "  + s.getFrigName() + ", cantidad de plcs: " + s.getPlcs().size());
 			socket.emit("envioVariables", json);
 		} catch (JsonProcessingException e) {
 			e.printStackTrace();
@@ -102,5 +133,12 @@ public class SocketConnection implements Runnable{
 			e.printStackTrace();
 		}
     }
+
+	public Boolean isConnected() {
+		return connected;
+	}
+    
+    
+    
     
 }

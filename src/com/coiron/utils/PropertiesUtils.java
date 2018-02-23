@@ -14,8 +14,12 @@ public class PropertiesUtils {
 	private static String usernamePLC = null;
 	private static String passwordPLC = null;
 	private static String formId = null;
+	private static String formAction = null;
+	private static String usernameFormId = null;
+	private static String passwordFormId = null;
 	private static String PLCAdminURL = null;
 	private static String PLCWebServerURL = null;
+	private static String cantPLCS = null;
 	
 	public static String getServerURL() {
 		if(serverURL == null) {
@@ -53,10 +57,31 @@ public class PropertiesUtils {
 	}
 	
 	public static String getFormId() {
-		if(passwordPLC == null) {
-			passwordPLC = readProperty("formId");
+		if(formId == null) {
+			formId = readProperty("formId");
 		}
-		return passwordPLC;
+		return formId;
+	}
+	
+	public static String getFormAction() {
+		if(formAction == null) {
+			formAction = readProperty("formAction");
+		}
+		return formAction;
+	}
+	
+	public static String getUsernameFormId() {
+		if(usernameFormId == null) {
+			usernameFormId = readProperty("usernameFormId");
+		}
+		return usernameFormId;
+	}
+	
+	public static String getPasswordFormId() {
+		if(passwordFormId == null) {
+			passwordFormId = readProperty("passwordFormId");
+		}
+		return passwordFormId;
 	}
 	
 	public static String getPLCAdminURL() {
@@ -73,6 +98,12 @@ public class PropertiesUtils {
 		return PLCWebServerURL;
 	}
 
+	public static String getCantPLCS() {
+		if(cantPLCS == null) {
+			cantPLCS = readProperty("cantPLCS");
+		}
+		return cantPLCS;
+	}
 	
 	private static String readProperty(String name) {
 

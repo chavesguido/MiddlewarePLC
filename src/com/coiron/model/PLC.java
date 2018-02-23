@@ -14,6 +14,7 @@ import org.jsoup.select.Elements;
 import com.coiron.connections.NetConnection;
 import com.coiron.utils.PropertiesUtils;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.databind.annotation.JsonAppend.Prop;
 
 public class PLC {
 
@@ -24,15 +25,17 @@ public class PLC {
 	private NetConnection webserver = null;
 	private Map<String, String> variables = null;
 	
-	public PLC(String ip) {
+	public PLC(String ip, String protocol) {
 		try {
 			variables = new HashMap<String, String>();
-			this.ip = "http://" + ip;
+			this.ip = protocol + ip;
 			login();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
+	
+	public PLC(){}
 
 	public String getId() {
 		return id;
@@ -61,10 +64,13 @@ public class PLC {
 	
 	public void login() throws Exception {
 		if(ip != null)
-			webserver = new NetConnection(ip + PropertiesUtils.getPLCAdminURL(),
-					PropertiesUtils.getFormId(),
-					PropertiesUtils.getUsernamePLC(),
-					PropertiesUtils.getPasswordPLC());
+			webserver = new NetConnection(	ip + PropertiesUtils.getPLCAdminURL(),
+											PropertiesUtils.getFormId(),
+											PropertiesUtils.getUsernamePLC(),
+											PropertiesUtils.getPasswordPLC(),
+											ip + PropertiesUtils.getFormAction(),
+											PropertiesUtils.getUsernameFormId(),
+											PropertiesUtils.getPasswordFormId());
 	}
 	
 	
@@ -86,18 +92,12 @@ public class PLC {
 		}
 
 		Document doc = Jsoup.parse(html);
-
+		
 		Elements variableElements = doc.getElementsByTag("div");
 		
 		for(Element variableElement : variableElements) {
 			String key = variableElement.getElementsByClass("key").get(0).text();
-			String value = 	String.valueOf(
-								Integer.parseInt(
-										variableElement.getElementsByClass("value").get(0).text()
-									)
-								+
-								(new Random().nextInt(20))
-							);
+			String value = 	variableElement.getElementsByClass("value").get(0).text();
 			
 			this.variables.put(key, value);
 		}
@@ -108,7 +108,7 @@ public class PLC {
 		
 	}
 
-	public void updateWebServer(Set<String> keys) throws Exception {
+	public void updateWebServer(Map<String, String> vars) throws Exception {
 		
 		if( webserver == null)
 			login();
@@ -116,17 +116,17 @@ public class PLC {
 		String url = this.ip + PropertiesUtils.getPLCWebServerURL();
 		String postParams = "";
 		
-		for(String key : keys) {
+		for(String key : vars.keySet()) {
 			
-			String value = this.variables.get(key);
+			String value = vars.get(key);
 			postParams += key + "=" + value + "&";
 		}
 		
 		postParams = postParams.substring(0, postParams.length() - 1);
 		
 		
-		System.out.println("POST a " + url + " con parametros " + postParams);
-		this.webserver.sendPost(url, postParams);
+		System.out.println("EDITAR VARIABLES: POST a " + url + " con parametros " + postParams);
+		this.webserver.sendPost(url, postParams, false);
 	}
 
 	@Override

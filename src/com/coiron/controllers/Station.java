@@ -1,5 +1,6 @@
 package com.coiron.controllers;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -38,10 +39,25 @@ public class Station {
 	
 	public void run() {
 		
+		//Buscando PLCs con WebServer habilitado en red Local
 		searchPLCS();
 		
+		//Conectandose con el servidor
 		new Thread(SocketConnection.getInstance(), "socket").start();
 		
+		while( !SocketConnection.getInstance().isConnected() ) {
+			
+			synchronized (obj) {
+				try {
+					TimeUnit.SECONDS.sleep(3);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+			}
+			
+		}
+		
+		//Enviando variables de los plcs al servidor
 		PLCSToServer();
 		
 	}
@@ -51,33 +67,33 @@ public class Station {
 		try {
 			System.out.println("Detectando PLC en la red...");
 			
-			List<String> PLC_IPs = NetUtils.getPLCIPs();
+			Map<String, String> PLC_IPs = NetUtils.getPLCIPs();
 			
-			System.out.println(PLC_IPs.size() + " PLC encontrados en la red.");
+			System.out.println("\n\n" + PLC_IPs.size() + " PLC encontrados en la red.\n\n");
 			
-			for(String ip : PLC_IPs){
+			for(String ip : PLC_IPs.keySet()){
 				
 				System.out.println("Sincronizando PLC con IP " + ip);
 				
-				PLC p = new PLC(ip);
+				PLC p = new PLC(ip, PLC_IPs.get(ip));
 				plcs.add(p);
 				
-				//ACA VA METODO PARA CONSEGUIR EL ID DEL PLC CONECTANDOSE AL HTML
-//				getPLCId();
-				//SOLO PARA TEST, BORRAR
-				//TODO GET PLC ID
-				p.setId("plc1");
+				p.setId( NetUtils.getMacAddress(ip) );
 			}
 			
 			
-			//TODO MOCK PLC DELETE
-			//MOCK PLC
-			System.out.println("Sincronizando PLC con IP 127.0.0.1:4200");
-			PLC p = new PLC("127.0.0.1:4200");
-			plcs.add(p);
-			p.setId("plc1");
-			//MOCK PLC
 			
+			
+			//MOCK PLC BASADO EN PARAMETRO DEL PROPERTIES
+			String cant = PropertiesUtils.getCantPLCS();
+			
+			for(int i=1; i<= Integer.parseInt(cant); i++) {
+				System.out.println("Sincronizando PLC" + i + " con IP 127.0.0.1:4200");
+				PLC p = new PLC("127.0.0.1:4200", "http://");
+				plcs.add(p);
+				p.setId("plc" + i + PropertiesUtils.getClientID() + PropertiesUtils.getFrigName());
+			}
+			//MOCK PLC
 			
 			
 			
@@ -138,12 +154,14 @@ public class Station {
 		
 		if(plcLocal == null) return;
 		
-		for(Entry<String, String> v : variables.entrySet()) 
-			plcLocal.getVariables().put( v.getKey(), v.getValue() );
+//		plcLocal.setVariables(variables);
+		
+//		for(Entry<String, String> v : variables.entrySet()) 
+//			plcLocal.getVariables().put( v.getKey(), v.getValue() );
 		
 		try {
 			
-			plcLocal.updateWebServer( plcLocal.getVariables().keySet() );
+			plcLocal.updateWebServer( variables );
 			
 		} catch (Exception e) {
 			e.printStackTrace();
