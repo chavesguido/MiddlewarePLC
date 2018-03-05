@@ -50,20 +50,22 @@ public class NetUtils {
 		List<String> localIps = getLocalIPs();
 		Map<String, String> PLCIps = new HashMap<String, String>();
 		
+		System.out.println("\nEscaneando IPs para detectar PLCS...");
+		
 		for(String ip : localIps) {
 			try {
-				System.out.println("scanning http://" + ip + PropertiesUtils.getPLCAdminURL());
+				System.out.println("\nscanning http://" + ip + PropertiesUtils.getPLCAdminURL());
 				String loginHTML = getHTML("http://" + ip + PropertiesUtils.getPLCAdminURL());
 				
 				if(loginHTML.contains("Portal") || loginHTML.contains("Siemens")) {
 					PLCIps.put(ip, "http://");
-					System.out.println(ip + " is a plc IP");					
+					System.out.println(ip + " es un PLC");					
 				}else {
-					System.out.println(ip + " not a plc IP");
+					System.out.println(ip + " no es un PLC");
 				}
 
 			} catch (Exception e) {
-				System.out.println(ip + " not a plc IP");
+				System.out.println(ip + " no es un PLC");
 			}
 			
 			try {
@@ -74,13 +76,13 @@ public class NetUtils {
 				
 				if(loginHTML.contains("Portal") || loginHTML.contains("Siemens")) {
 					PLCIps.put(ip, "https://");
-					System.out.println(ip + " is a plc IP");					
+					System.out.println(ip + " es un PLC");					
 				}else {
-					System.out.println(ip + " not a plc IP");
+					System.out.println(ip + " no es un PLC");
 				}
 				
 			} catch (Exception e) {
-				System.out.println(ip + " not a plc IP");
+				System.out.println(ip + " no es un PLC");
 			}
 		}
 		

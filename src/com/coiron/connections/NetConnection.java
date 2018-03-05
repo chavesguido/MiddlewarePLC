@@ -46,7 +46,8 @@ public class NetConnection {
 		this.usernameFormId = usernameFormName;
 		this.passwordFormId = passwordFormName;
 
-		login();
+		if( !loginURL.contains("localhost") && !loginURL.contains("127.0.0.1") )
+			login();
 	}
 	
 	public String getPageContent(String url) throws Exception {

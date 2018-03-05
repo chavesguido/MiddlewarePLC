@@ -1,7 +1,9 @@
 package com.coiron.controllers;
 
 import java.io.IOException;
+import java.net.ConnectException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -27,6 +29,10 @@ public class Station {
 	private String clientID = PropertiesUtils.getClientID();
 	private String frigName = PropertiesUtils.getFrigName();
 	private List<PLC> plcs = new ArrayList<PLC>();
+	
+	//PLCs que estaban conectados, se desconectaron, y pasan a un estado de reconexion constante. Cuando se reconectan,
+	//vuelven al array de plcs normal
+	private List<PLC> standBy = new ArrayList<PLC>();
 	
 	private Station() {}
 	
@@ -65,11 +71,19 @@ public class Station {
 	private void searchPLCS(){
 		
 		try {
-			System.out.println("Detectando PLC en la red...");
+			System.out.println("Detectando IPs en la red...\n");
 			
 			Map<String, String> PLC_IPs = NetUtils.getPLCIPs();
 			
-			System.out.println("\n\n" + PLC_IPs.size() + " PLC encontrados en la red.\n\n");
+			
+			
+			if( PLC_IPs.isEmpty() ) {
+				System.out.println("\n\nNo se han encontrado PLCs en la red. Asegurese de estar conectado a la misma red y"
+						+ " que los PLCs esten configurados como WebServers.");
+				System.exit(0);
+			}
+			else
+				System.out.println("\n\n" + PLC_IPs.size() + " PLC encontrados en la red.\n\n");
 			
 			for(String ip : PLC_IPs.keySet()){
 				
@@ -106,6 +120,7 @@ public class Station {
 	
 	private void PLCSToServer() {
 		
+		
 		synchronizing = true;
 		
 		while(true){
@@ -118,33 +133,80 @@ public class Station {
 					
 					synchronizePLCS();
 					
-					SocketConnection.getInstance().sendPLCSLikeJSON(this);
+					if( !plcs.isEmpty() )
+						SocketConnection.getInstance().sendPLCSLikeJSON(this);
 					
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
 			}
+			
+			
 		}
 	}
 	
 	private void synchronizePLCS() {
+		
 		for (PLC p : plcs) {
 			
 			try {
 				p.synchronize();
-			} catch (Exception e){
+			}catch(ConnectException ce) {
+				SocketConnection.getInstance().deletePLC(p);
+				standBy.add(p);
+				
+				System.out.println("Se ha perdido la conexión con el PLC con id " + p.getId() + ". Razón: " + ce.getMessage() + "\n");
+			}catch (Exception e){
 				
 				if(e.getMessage().equalsIgnoreCase("DELETE PLC")) {
 					SocketConnection.getInstance().deletePLC(p);
+					standBy.add(p);
 				}
 				else e.printStackTrace();
-				
 			}
 			
 		}
+		
+		for (PLC p : standBy) {
+			p.setWebserver(null);
+			plcs.remove(p);
+		}
+		
+		reconnectStandBy();
+		
 	}
 	
 	
+	private void reconnectStandBy() {
+		
+		Iterator<PLC> iter = standBy.iterator();
+		
+		while (iter.hasNext()) {
+		    PLC p = iter.next();
+
+		    try {
+				p.synchronize();
+				
+				//Si pasa el synchronize es porque no catcheo, entonces lo devuelve al array normal
+				//y lo saco de los standBy
+				
+				plcs.add(p);
+				iter.remove();
+				
+				System.out.println("Plc con id " + p.getId() + " reconectado.\n");
+				
+		    }catch(ConnectException ce) {
+				System.out.println("Plc con id " + p.getId() + " continua offline.\n");
+			} catch (Exception e){
+				
+				if(e.getMessage().equalsIgnoreCase("DELETE PLC")) {
+				}
+				else e.printStackTrace();
+			}
+		}
+		
+	}
+
 	public void updatePLC( String idPLC, Map<String, String> variables ) {
 		synchronizing = false;
 		

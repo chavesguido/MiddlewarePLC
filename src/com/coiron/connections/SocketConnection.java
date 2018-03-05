@@ -115,7 +115,7 @@ public class SocketConnection implements Runnable{
 			String json = objectMapper.writeValueAsString(s);
 			
 			
-			System.out.println("Enviando al servidor plcs de " + s.getClientID() + " - "  + s.getFrigName() + ", cantidad de plcs: " + s.getPlcs().size());
+			System.out.println("\nEnviando al servidor plcs de " + s.getClientID() + " - "  + s.getFrigName() + ", cantidad de plcs: " + s.getPlcs().size() + "\n");
 			socket.emit("envioVariables", json);
 		} catch (JsonProcessingException e) {
 			e.printStackTrace();
@@ -123,15 +123,8 @@ public class SocketConnection implements Runnable{
     }
     
     public void deletePLC(PLC p) {
-    	ObjectMapper objectMapper = new ObjectMapper();
-    	
-    	try {
-			String json = objectMapper.writeValueAsString(p);
-			
-			socket.emit("plcOffline", json);
-		} catch (JsonProcessingException e) {
-			e.printStackTrace();
-		}
+			System.out.println("PLC OFFLINE CON ID " + p.getId());
+			socket.emit("plcOffline", p.getId());
     }
 
 	public Boolean isConnected() {
