@@ -1,8 +1,12 @@
 package com.coiron.init;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.concurrent.TimeUnit;
@@ -18,16 +22,127 @@ import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.X509Certificate;
 
+import com.coiron.connections.NetConnection;
 import com.coiron.controllers.Station;
 import com.coiron.model.PLC;
+import com.coiron.utils.PropertiesUtils;
 
 public class Init{
-
-	public static void main(String[] args){
-//		test();
-		
+	
+	public static void main(String[] args) throws IOException{
 		disableSslVerification();
 		
+//		StringBuffer output = new StringBuffer();
+//		
+//		Process p = Runtime.getRuntime().exec(
+//"curl-login.bat \"" + ip + formAction + "\" -H \"Connection: keep-alive\" -H \"Origin: " + ip + "\" -H \"Referer: " + ip + PLCAdminURL + "\" --data \"Redirection=&Login=" + username + "&Password=" + password + "\" \"" + ip + "_file.txt\" " + ip + "_tempLogin.txt"
+//				);
+////	    p.waitFor();
+//		
+////		ProcessBuilder builder = new ProcessBuilder(com);
+////		builder.redirectOutput(new File("curloutput.txt"));
+////		builder.start();
+////		System.out.println(p.getOutputStream().toString());
+//		
+//
+//	    InputStream is = p.getInputStream();
+//		InputStreamReader isr = new InputStreamReader(is);
+//		BufferedReader br = new BufferedReader(isr);
+//		String line;
+//
+//		while ((line = br.readLine()) != null) {
+//			output.append(line + "\n");
+//	    	System.out.println(line);
+//		}
+//		
+//		return;
+//		
+//		
+//		try {
+////			new NetConnection().sendPost("https://www.facebook.com", "Redirection=&Login=admin&Password=admin", false);
+//		} catch (Exception e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+//		System.out.println("dsa\n\n\n\n\n\n\n\n");
+//		
+//		try {
+////			new NetConnection().sendPost("https://192.168.0.192/FormLogin", "Redirection=&Login=admin&Password=admin", false);
+//		} catch (Exception e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+//		
+//		
+//		
+//		
+//		System.out.println("asd");
+//		StringBuffer output = new StringBuffer();
+//		String com = PropertiesUtils.readProperty("curl1");
+//		System.out.println(com);
+//		Process p = Runtime.getRuntime().exec(com);
+////	    p.waitFor();
+//		
+////		ProcessBuilder builder = new ProcessBuilder(com);
+////		builder.redirectOutput(new File("curloutput.txt"));
+////		builder.start();
+////		System.out.println(p.getOutputStream().toString());
+//
+//	    InputStream is = p.getInputStream();
+//		InputStreamReader isr = new InputStreamReader(is);
+//		BufferedReader br = new BufferedReader(isr);
+//		String line;
+//
+//		while ((line = br.readLine()) != null) {
+//			output.append(line + "\n");
+//	    	System.out.println(line);
+//		}
+//		System.out.println("dsa");
+//		System.out.println("dsa");
+//		System.out.println("dsa");
+//		System.out.println("dsa\n\n\n\n\n\n\n\n");
+//		
+//		
+//		System.out.println("asd");
+//		 output = new StringBuffer();
+//		  com = PropertiesUtils.readProperty("curl2");
+//		System.out.println(com);
+//		 p = Runtime.getRuntime().exec(com);
+////	    p.waitFor();
+//		
+////		ProcessBuilder builder = new ProcessBuilder(com);
+////		builder.redirectOutput(new File("curloutput.txt"));
+////		builder.start();
+////		System.out.println(p.getOutputStream().toString());
+//
+//	     is = p.getInputStream();
+//		 isr = new InputStreamReader(is);
+//		 br = new BufferedReader(isr);
+//
+//		while ((line = br.readLine()) != null) {
+//			output.append(line + "\n");
+//	    	System.out.println(line);
+//		}
+//		
+//		
+//		
+//		
+////		test();
+////		String path = Init.class.getProtectionDomain().getCodeSource().getLocation().getPath();
+////		try {
+////			String decodedPath = URLDecoder.decode(path, "UTF-8");
+////			System.out.println(decodedPath);
+////			System.out.println(new File(".").getAbsolutePath());
+////		} catch (UnsupportedEncodingException e) {
+////			// TODO Auto-generated catch block
+////			e.printStackTrace();
+////		}
+////		
+//		new NetConnection("https://192.168.0.192", "/FormLogin", "/Portal/Portal.mwsl", "admin", "admin");
+//		
+		
+//		NetConnection nc = new NetConnection("https://192.168.0.192", "/FormLogin", "/Portal/Portal.mwsl", "admin", "admin");
+//		nc.editVarByCURL("https://192.168.0.192", "/awp//index.htm", "%22DiSbAltSH%22.Ti2Start=622");
 		Station.getInstance().run();
 		
 	}

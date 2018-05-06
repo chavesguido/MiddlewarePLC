@@ -105,7 +105,7 @@ public class PropertiesUtils {
 		return cantPLCS;
 	}
 	
-	private static String readProperty(String name) {
+	public static String readProperty(String name) {
 
 		Properties prop = new Properties();
 		InputStream input = null;

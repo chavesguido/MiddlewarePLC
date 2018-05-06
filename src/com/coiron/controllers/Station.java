@@ -71,13 +71,15 @@ public class Station {
 	private void searchPLCS(){
 		
 		try {
+			String cantMock = PropertiesUtils.getCantPLCS();
+			
 			System.out.println("Detectando IPs en la red...\n");
 			
 			Map<String, String> PLC_IPs = NetUtils.getPLCIPs();
 			
 			
 			
-			if( PLC_IPs.isEmpty() ) {
+			if( PLC_IPs.isEmpty() && "0".equals(cantMock) ) {
 				System.out.println("\n\nNo se han encontrado PLCs en la red. Asegurese de estar conectado a la misma red y"
 						+ " que los PLCs esten configurados como WebServers.");
 				System.exit(0);
@@ -99,9 +101,8 @@ public class Station {
 			
 			
 			//MOCK PLC BASADO EN PARAMETRO DEL PROPERTIES
-			String cant = PropertiesUtils.getCantPLCS();
 			
-			for(int i=1; i<= Integer.parseInt(cant); i++) {
+			for(int i=1; i<= Integer.parseInt(cantMock); i++) {
 				System.out.println("Sincronizando PLC" + i + " con IP 127.0.0.1:4200");
 				PLC p = new PLC("127.0.0.1:4200", "http://");
 				plcs.add(p);
@@ -111,7 +112,7 @@ public class Station {
 			
 			
 			
-			System.out.println("PLC sincronizados.");
+			System.out.println("PLC sincronizados.\n");
 			
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -128,7 +129,7 @@ public class Station {
 				try {
 					
 					synchronized (obj) {
-						TimeUnit.SECONDS.sleep(5);
+						TimeUnit.SECONDS.sleep(10);
 					}
 					
 					synchronizePLCS();

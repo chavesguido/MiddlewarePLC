@@ -64,13 +64,18 @@ public class PLC {
 	
 	public void login() throws Exception {
 		if(ip != null)
-			webserver = new NetConnection(	ip + PropertiesUtils.getPLCAdminURL(),
-											PropertiesUtils.getFormId(),
+			webserver = new NetConnection(	ip ,
+											PropertiesUtils.getFormAction(),
+											PropertiesUtils.getPLCAdminURL(),
 											PropertiesUtils.getUsernamePLC(),
-											PropertiesUtils.getPasswordPLC(),
-											ip + PropertiesUtils.getFormAction(),
-											PropertiesUtils.getUsernameFormId(),
-											PropertiesUtils.getPasswordFormId());
+											PropertiesUtils.getPasswordPLC());
+//			webserver = new NetConnection(	ip + PropertiesUtils.getPLCAdminURL(),
+//					PropertiesUtils.getFormId(),
+//					PropertiesUtils.getUsernamePLC(),
+//					PropertiesUtils.getPasswordPLC(),
+//					ip + PropertiesUtils.getFormAction(),
+//					PropertiesUtils.getUsernameFormId(),
+//					PropertiesUtils.getPasswordFormId());
 	}
 	
 	
@@ -82,8 +87,10 @@ public class PLC {
 //		this.variables.put("Evaporación máxima", String.valueOf( (Math.random() * 100) + 400 ));
 		
 		System.out.println("sincronizando plc " + this.ip);
-		if(webserver == null)
+		if(webserver == null) {
+			System.out.println("PLC sin conexión. Logueando...");
 			login();
+		}
 		
 		String html = this.webserver.getPageContent( this.ip + PropertiesUtils.getPLCWebServerURL() );
 		
@@ -97,7 +104,17 @@ public class PLC {
 		
 		for(Element variableElement : variableElements) {
 			String key = variableElement.getElementsByClass("key").get(0).text();
-			String value = 	variableElement.getElementsByClass("value").get(0).text();
+			String value;
+			
+			if( !ip.contains("localhost") && !ip.contains("127.0.0.1") )
+				value = variableElement.getElementsByClass("value").get(0).text();
+			
+			else //Si el plc esta en localhost es MOCK, genero valores aleatorios
+				value = String.valueOf(
+										Integer.parseInt(
+												variableElement.getElementsByClass("value").get(0).text()
+											) + new Random().nextInt(20)
+						);
 			
 			this.variables.put(key, value);
 		}
@@ -119,14 +136,20 @@ public class PLC {
 		for(String key : vars.keySet()) {
 			
 			String value = vars.get(key);
-			postParams += key + "=" + value + "&";
+			postParams += formatVariableName(key) + "=" + value + "&";
 		}
 		
 		postParams = postParams.substring(0, postParams.length() - 1);
 		
 		
-		System.out.println("EDITAR VARIABLES: POST a " + url + " con parametros " + postParams);
-		this.webserver.sendPost(url, postParams, false);
+		System.out.println("Editando variables: POST a " + ip + " con parametros " + postParams);
+//		this.webserver.sendPost(url, postParams, false);
+		webserver.editVar(postParams);
+	}
+
+	private String formatVariableName(String key) {
+		String[] keySplitted = key.split("\\.");
+		return "%22" + keySplitted[0] + "%22." + keySplitted[1];
 	}
 
 	@Override
