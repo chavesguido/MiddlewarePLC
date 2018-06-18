@@ -110,11 +110,15 @@ public class PLC {
 				value = variableElement.getElementsByClass("value").get(0).text();
 			
 			else //Si el plc esta en localhost es MOCK, genero valores aleatorios
-				value = String.valueOf(
-										Integer.parseInt(
-												variableElement.getElementsByClass("value").get(0).text()
-											) + new Random().nextInt(20)
-						);
+				try {
+					value = String.valueOf(
+											Integer.parseInt(
+													variableElement.getElementsByClass("value").get(0).text()
+												) + new Random().nextInt(20)
+							);
+				} catch(NumberFormatException e) {
+					value = variableElement.getElementsByClass("value").get(0).text();
+				}
 			
 			this.variables.put(key, value);
 		}
