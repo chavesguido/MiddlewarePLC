@@ -1,21 +1,18 @@
 package com.coiron.controllers;
 
-import java.io.IOException;
 import java.net.ConnectException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
 
-import com.coiron.connections.NetConnection;
-import com.coiron.connections.SocketConnection;
+import com.coiron.connections.CloudSocketConnection;
+import com.coiron.connections.LocalSocketConnection;
 import com.coiron.model.PLC;
 import com.coiron.utils.NetUtils;
 import com.coiron.utils.PropertiesUtils;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class Station {
 	@JsonIgnore
@@ -48,10 +45,9 @@ public class Station {
 		//Buscando PLCs con WebServer habilitado en red Local
 		searchPLCS();
 		
-		//Conectandose con el servidor
-		new Thread(SocketConnection.getInstance(), "socket").start();
-		
-		while( !SocketConnection.getInstance().isConnected() ) {
+		//Conectandose con servidor local
+		new Thread(LocalSocketConnection.getInstance(), "socketLocalServer").start();
+		while( !LocalSocketConnection.getInstance().isConnected() ) {
 			
 			synchronized (obj) {
 				try {
@@ -63,8 +59,10 @@ public class Station {
 			
 		}
 		
-		//Enviando variables de los plcs al servidor
-		PLCSToServer();
+		new Thread(CloudSocketConnection.getInstance(), "socketCloudServer").start();
+		
+		//Enviando variables de los plcs a servidores
+		PLCSToServers();
 		
 	}
 	
@@ -119,7 +117,7 @@ public class Station {
 		}
 	}
 	
-	private void PLCSToServer() {
+	private void PLCSToServers() {
 		
 		
 		synchronizing = true;
@@ -134,8 +132,10 @@ public class Station {
 					
 					synchronizePLCS();
 					
-					if( !plcs.isEmpty() )
-						SocketConnection.getInstance().sendPLCSLikeJSON(this);
+					if( !plcs.isEmpty() ) {
+						LocalSocketConnection.getInstance().sendPLCSLikeJSON(this);
+						CloudSocketConnection.getInstance().sendPLCSLikeJSON(this);
+					}
 					
 				} catch (InterruptedException e) {
 					e.printStackTrace();
@@ -153,14 +153,16 @@ public class Station {
 			try {
 				p.synchronize();
 			}catch(ConnectException ce) {
-				SocketConnection.getInstance().deletePLC(p);
+				LocalSocketConnection.getInstance().deletePLC(p);
+				CloudSocketConnection.getInstance().deletePLC(p);
 				standBy.add(p);
 				
 				System.out.println("Se ha perdido la conexión con el PLC con id " + p.getId() + ". Razón: " + ce.getMessage() + "\n");
 			}catch (Exception e){
 				
 				if(e.getMessage().equalsIgnoreCase("DELETE PLC")) {
-					SocketConnection.getInstance().deletePLC(p);
+					LocalSocketConnection.getInstance().deletePLC(p);
+					CloudSocketConnection.getInstance().deletePLC(p);
 					standBy.add(p);
 				}
 				else e.printStackTrace();

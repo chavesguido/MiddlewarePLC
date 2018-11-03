@@ -4,15 +4,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
-import java.net.InetAddress;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import javax.net.ssl.HttpsURLConnection;
 
@@ -50,26 +47,26 @@ public class NetUtils {
 		List<String> localIps = getLocalIPs();
 		Map<String, String> PLCIps = new HashMap<String, String>();
 		
-		System.out.println("\nEscaneando IPs para detectar PLCS...");
+		System.out.println("\nEscaneando IPs para detectar PLCS...\n");
 		
 		for(String ip : localIps) {
 			try {
-				System.out.println("\nscanning http://" + ip + PropertiesUtils.getPLCAdminURL());
+				System.out.println("Escaneando http://" + ip + PropertiesUtils.getPLCAdminURL());
 				String loginHTML = getHTML("http://" + ip + PropertiesUtils.getPLCAdminURL());
 				
 				if(loginHTML.contains("Portal") || loginHTML.contains("Siemens")) {
 					PLCIps.put(ip, "http://");
 					System.out.println(ip + " es un PLC");					
 				}else {
-					System.out.println(ip + " no es un PLC");
+//					System.out.println(ip + " no es un PLC");
 				}
 
 			} catch (Exception e) {
-				System.out.println(ip + " no es un PLC");
+//				System.out.println(ip + " no es un PLC");
 			}
 			
 			try {
-				System.out.println("scanning https://" + ip + PropertiesUtils.getPLCAdminURL());
+				System.out.println("Escaneando https://" + ip + PropertiesUtils.getPLCAdminURL());
 				String loginHTML = getHTML("https://" + ip + PropertiesUtils.getPLCAdminURL());
 				
 				
@@ -78,11 +75,11 @@ public class NetUtils {
 					PLCIps.put(ip, "https://");
 					System.out.println(ip + " es un PLC");					
 				}else {
-					System.out.println(ip + " no es un PLC");
+//					System.out.println(ip + " no es un PLC");
 				}
 				
 			} catch (Exception e) {
-				System.out.println(ip + " no es un PLC");
+//				System.out.println(ip + " no es un PLC");
 			}
 		}
 		

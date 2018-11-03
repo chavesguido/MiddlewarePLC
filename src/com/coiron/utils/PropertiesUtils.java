@@ -8,7 +8,8 @@ public class PropertiesUtils {
 	
 	private static final String PROPERTIES_FILEPATH = "properties.ini";
 	
-	private static String serverURL = null;
+	private static String localServerURL = null;
+	private static String cloudServerURL = null;
 	private static String clientID = null;
 	private static String frigName = null;
 	private static String usernamePLC = null;
@@ -20,12 +21,20 @@ public class PropertiesUtils {
 	private static String PLCAdminURL = null;
 	private static String PLCWebServerURL = null;
 	private static String cantPLCS = null;
+	private static Boolean onlyLocal = null;
 	
-	public static String getServerURL() {
-		if(serverURL == null) {
-			serverURL = readProperty("serverURL");
+	public static String getLocalServerURL() {
+		if(localServerURL == null) {
+			localServerURL = readProperty("localServerURL");
 		}
-		return serverURL;
+		return localServerURL;
+	}
+	
+	public static String getCloudServerURL() {
+		if(cloudServerURL == null) {
+			cloudServerURL = readProperty("cloudServerURL");
+		}
+		return cloudServerURL;
 	}
 	
 	public static String getClientID() {
@@ -104,6 +113,14 @@ public class PropertiesUtils {
 		}
 		return cantPLCS;
 	}
+	
+	public static Boolean getOnlyLocal() {
+		if(onlyLocal == null) {
+			onlyLocal = readProperty("onlyLocal") == "1" ? true : false;
+		}
+		return onlyLocal;
+	}
+	
 	
 	public static String readProperty(String name) {
 

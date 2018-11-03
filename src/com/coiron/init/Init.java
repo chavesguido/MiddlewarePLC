@@ -1,14 +1,11 @@
 package com.coiron.init;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
-import java.util.Arrays;
-import java.util.HashSet;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.X509Certificate;
 import java.util.concurrent.TimeUnit;
 
 import javax.net.ssl.HostnameVerifier;
@@ -18,14 +15,8 @@ import javax.net.ssl.SSLSession;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
-import java.security.KeyManagementException;
-import java.security.NoSuchAlgorithmException;
-import java.security.cert.X509Certificate;
-
-import com.coiron.connections.NetConnection;
 import com.coiron.controllers.Station;
 import com.coiron.model.PLC;
-import com.coiron.utils.PropertiesUtils;
 
 public class Init{
 	
@@ -143,8 +134,13 @@ public class Init{
 		
 //		NetConnection nc = new NetConnection("https://192.168.0.192", "/FormLogin", "/Portal/Portal.mwsl", "admin", "admin");
 //		nc.editVarByCURL("https://192.168.0.192", "/awp//index.htm", "%22DiSbAltSH%22.Ti2Start=622");
-		Station.getInstance().run();
+		startStation();
 		
+		
+	}
+	
+	private static void startStation() {
+		Station.getInstance().run();
 	}
 	
 	private static void disableSslVerification() {

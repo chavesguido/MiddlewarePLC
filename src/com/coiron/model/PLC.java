@@ -2,9 +2,7 @@ package com.coiron.model;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Properties;
 import java.util.Random;
-import java.util.Set;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -14,7 +12,6 @@ import org.jsoup.select.Elements;
 import com.coiron.connections.NetConnection;
 import com.coiron.utils.PropertiesUtils;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.databind.annotation.JsonAppend.Prop;
 
 public class PLC {
 

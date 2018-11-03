@@ -18,8 +18,8 @@ import io.socket.client.Socket;
 import io.socket.emitter.Emitter;
 
 
-public class SocketConnection implements Runnable{
-	private static SocketConnection instance = null;
+public class LocalSocketConnection implements Runnable {
+	private static LocalSocketConnection instance = null;
 	public final static Object obj = new Object();
 	
     Socket socket;
@@ -27,13 +27,14 @@ public class SocketConnection implements Runnable{
     ObjectInputStream in;
     String message;
     Boolean connected = false;
+    String url;
     
     
-    private SocketConnection(){}
+    private LocalSocketConnection(){}
     
-    public static SocketConnection getInstance() {
+    public static LocalSocketConnection getInstance() {
     	if(instance == null) {
-    		instance = new SocketConnection();
+    		instance = new LocalSocketConnection();
     	}
     	return instance;
     }
@@ -41,11 +42,13 @@ public class SocketConnection implements Runnable{
     @Override
     public void run() {
     	while(!connected) {
+    		
+    		detectLocalIPAddress();
     	
 			try {
-				System.out.println("Estableciendo conexión con el servidor web...");
+				System.out.println("Estableciendo conexión con el servidor local...");
 				
-				socket = IO.socket( PropertiesUtils.getServerURL() );
+				socket = IO.socket(url);
 				socket.on("editarVariables", new Emitter.Listener() {
 					
 					public void call(Object... arg0) {
@@ -75,7 +78,7 @@ public class SocketConnection implements Runnable{
 				socket.on("conectado", new Emitter.Listener() {
 					public void call(Object... arg0) {
 						connected = true;
-						System.out.println("Socket conectado.");
+						System.out.println("Socket conectado con el servidor local.");
 					}
 				});
 				
@@ -92,7 +95,7 @@ public class SocketConnection implements Runnable{
 				if(connected) {
 					System.out.println("Conexión establecida.");
 				}else {
-					System.out.println("\nNo se pudo establecer conexión. Reintentando.");
+					System.out.println("\nNo se pudo establecer conexión con el servidor local. Asegurese de que se encuentra online. Reintentando conexión...");
 					socket.disconnect();
 					socket = null;
 				}
@@ -108,7 +111,11 @@ public class SocketConnection implements Runnable{
     	}
     }
     
-    public void sendPLCSLikeJSON(Station s) {
+    private void detectLocalIPAddress() {
+		url = PropertiesUtils.getLocalServerURL();
+	}
+
+	public void sendPLCSLikeJSON(Station s) {
     	ObjectMapper objectMapper = new ObjectMapper();
     	
     	try {
