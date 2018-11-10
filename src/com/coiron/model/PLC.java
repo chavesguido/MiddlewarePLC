@@ -83,9 +83,9 @@ public class PLC {
 //		this.variables.put("Evaporación mínima", String.valueOf( (Math.random() * 100) + 800 ));
 //		this.variables.put("Evaporación máxima", String.valueOf( (Math.random() * 100) + 400 ));
 		
-		System.out.println("sincronizando plc " + this.ip);
+		System.out.println("Sincronizando PLC " + this.ip);
 		if(webserver == null) {
-			System.out.println("PLC sin conexión. Logueando...");
+			System.err.println("PLC sin conexión. Logueando...");
 			login();
 		}
 		

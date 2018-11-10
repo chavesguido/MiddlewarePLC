@@ -28,9 +28,15 @@ public class LocalSocketConnection implements Runnable {
     String message;
     Boolean connected = false;
     String url;
+    Boolean disabled;
     
     
-    private LocalSocketConnection(){}
+    private LocalSocketConnection(){
+    	disabled = PropertiesUtils.getDisabledLocal();
+    	if (disabled) {
+			System.out.println("Sincronización con Servidor Local deshabilitada.");
+		}
+    }
     
     public static LocalSocketConnection getInstance() {
     	if(instance == null) {
@@ -41,6 +47,10 @@ public class LocalSocketConnection implements Runnable {
     
     @Override
     public void run() {
+    	if (disabled) {
+			return;
+		}
+    	
     	while(!connected) {
     		
     		detectLocalIPAddress();
@@ -78,7 +88,6 @@ public class LocalSocketConnection implements Runnable {
 				socket.on("conectado", new Emitter.Listener() {
 					public void call(Object... arg0) {
 						connected = true;
-						System.out.println("Socket conectado con el servidor local.");
 					}
 				});
 				
@@ -93,9 +102,9 @@ public class LocalSocketConnection implements Runnable {
 				}
 				
 				if(connected) {
-					System.out.println("Conexión establecida.");
+					System.out.println("Conexión establecida con el servidor Local.");
 				}else {
-					System.out.println("\nNo se pudo establecer conexión con el servidor local. Asegurese de que se encuentra online. Reintentando conexión...");
+					System.err.println("No se pudo establecer conexión con el servidor local. Asegurese de que se encuentra online. Reintentando conexión...\n");
 					socket.disconnect();
 					socket = null;
 				}
@@ -116,13 +125,18 @@ public class LocalSocketConnection implements Runnable {
 	}
 
 	public void sendPLCSLikeJSON(Station s) {
+		if (disabled) {
+			return;
+		}
+		
     	ObjectMapper objectMapper = new ObjectMapper();
     	
     	try {
 			String json = objectMapper.writeValueAsString(s);
 			
-			
-			System.out.println("\nEnviando al servidor plcs de " + s.getClientID() + " - "  + s.getFrigName() + ", cantidad de plcs: " + s.getPlcs().size() + "\n");
+			if (PropertiesUtils.getDebugLog()) {
+				System.out.println("\nEnviando al servidor plcs de " + s.getClientID() + " - "  + s.getFrigName() + ", cantidad de plcs: " + s.getPlcs().size() + "\n");
+			}
 			socket.emit("envioVariables", json);
 		} catch (JsonProcessingException e) {
 			e.printStackTrace();
@@ -130,8 +144,20 @@ public class LocalSocketConnection implements Runnable {
     }
     
     public void deletePLC(PLC p) {
-			System.out.println("PLC OFFLINE CON ID " + p.getId());
-			socket.emit("plcOffline", p.getId());
+    	if (disabled) {
+			return;
+		}
+    	
+		System.out.println("PLC Offline con id " + p.getId());
+		socket.emit("plcOffline", p.getId());
+    }
+    
+    public Boolean isDisabled() {
+    	return disabled;
+    }
+    
+    public void disable() {
+    	disabled = true;
     }
 
 	public Boolean isConnected() {

@@ -32,6 +32,9 @@ public class CloudSocketConnection implements Runnable {
     
     private CloudSocketConnection(){
     	disabled = PropertiesUtils.getOnlyLocal();
+    	if (disabled) {
+			System.out.println("Sincronización con Servidor Cloud deshabilitada.");
+		}
     }
     
     public static CloudSocketConnection getInstance() {
@@ -82,7 +85,6 @@ public class CloudSocketConnection implements Runnable {
 				socket.on("conectado", new Emitter.Listener() {
 					public void call(Object... arg0) {
 						connected = true;
-						System.out.println("Socket conectado con el servidor Clod.");
 					}
 				});
 				
@@ -99,7 +101,7 @@ public class CloudSocketConnection implements Runnable {
 				if(connected) {
 					System.out.println("Conexión establecida con el servidor Cloud.");
 				}else {
-					System.out.println("\nNo se pudo establecer conexión con el servidor Cloud. Reintentando.");
+					System.err.println("No se pudo establecer conexión con el servidor Cloud. Reintentando en 15 segundos....\n");
 					socket.disconnect();
 					socket = null;
 					
@@ -134,8 +136,9 @@ public class CloudSocketConnection implements Runnable {
     	try {
 			String json = objectMapper.writeValueAsString(s);
 			
-			
-			System.out.println("\nEnviando al servidor plcs de " + s.getClientID() + " - "  + s.getFrigName() + ", cantidad de plcs: " + s.getPlcs().size() + "\n");
+			if (PropertiesUtils.getDebugLog()) {
+				System.out.println("\nEnviando al servidor plcs de " + s.getClientID() + " - "  + s.getFrigName() + ", cantidad de plcs: " + s.getPlcs().size() + "\n");
+			}
 			socket.emit("envioVariables", json);
 		} catch (JsonProcessingException e) {
 			e.printStackTrace();
@@ -147,7 +150,7 @@ public class CloudSocketConnection implements Runnable {
 			return;
 		}
     	
-		System.out.println("PLC OFFLINE CON ID " + p.getId());
+		System.out.println("PLC Offline con id " + p.getId());
 		socket.emit("plcOffline", p.getId());
     }
 

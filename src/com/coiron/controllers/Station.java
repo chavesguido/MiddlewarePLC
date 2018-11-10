@@ -1,7 +1,9 @@
 package com.coiron.controllers;
 
 import java.net.ConnectException;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -21,6 +23,9 @@ public class Station {
 	public final static Object obj = new Object();
 	@JsonIgnore
 	private boolean synchronizing = false;
+	
+	private final static Integer STAND_BY_TOTAL_COUNT = 3;
+	private Integer standByCount = 0;
 
 	
 	private String clientID = PropertiesUtils.getClientID();
@@ -40,23 +45,26 @@ public class Station {
 		return instance;
 	}
 	
+	private void wait(int seconds) {
+		synchronized (obj) {
+			try {
+				TimeUnit.SECONDS.sleep(seconds);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+	
 	public void run() {
+		logStart();
 		
 		//Buscando PLCs con WebServer habilitado en red Local
 		searchPLCS();
 		
 		//Conectandose con servidor local
 		new Thread(LocalSocketConnection.getInstance(), "socketLocalServer").start();
-		while( !LocalSocketConnection.getInstance().isConnected() ) {
-			
-			synchronized (obj) {
-				try {
-					TimeUnit.SECONDS.sleep(3);
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
-			}
-			
+		while( !LocalSocketConnection.getInstance().isConnected() && !LocalSocketConnection.getInstance().isDisabled() ) {
+			wait(3);
 		}
 		
 		new Thread(CloudSocketConnection.getInstance(), "socketCloudServer").start();
@@ -66,6 +74,17 @@ public class Station {
 		
 	}
 	
+	private void logStart() {
+		System.out.println("/----------------------------------/");
+		System.out.println("/--------MIDDLEWARE COIRON---------/");
+		System.out.println("/----------------------------------/");
+		
+		System.out.println("\nInicializando Middleware");
+		wait(3);
+		System.out.println("Cargando Configuración");
+		wait(2);
+	}
+	
 	private void searchPLCS(){
 		
 		try {
@@ -73,17 +92,32 @@ public class Station {
 			
 			System.out.println("Detectando IPs en la red...\n");
 			
-			Map<String, String> PLC_IPs = NetUtils.getPLCIPs();
+			Map<String, String> PLC_IPs = Collections.emptyMap();
+			
+			try {
+				PLC_IPs = NetUtils.getPLCIPs();
+			} catch (Exception e) {
+				e.printStackTrace();
+				System.err.println("\n\nError al detectar IPs en la red");
+			}
 			
 			
 			
 			if( PLC_IPs.isEmpty() && "0".equals(cantMock) ) {
-				System.out.println("\n\nNo se han encontrado PLCs en la red. Asegurese de estar conectado a la misma red y"
-						+ " que los PLCs esten configurados como WebServers.");
+				System.out.println("\n\nNo se han encontrado PLCs en la red. Asegurese de estar conectado a la misma red que los PLCs y"
+						+ " que los mismos esten configurados como WebServers");
 				System.exit(0);
 			}
-			else
-				System.out.println("\n\n" + PLC_IPs.size() + " PLC encontrados en la red.\n\n");
+			else {
+				if (PLC_IPs.size() == 1) {
+					System.out.println("\n\n1 PLC encontrado en la red.\n\n");
+				} else {
+					System.out.println("\n\n" + PLC_IPs.size() + " PLCs encontrados en la red.\n\n");
+				}
+				if (!"0".equals(cantMock)) {
+					System.out.println(cantMock + " PLCs mockeados.\n\n");
+				}
+			}
 			
 			for(String ip : PLC_IPs.keySet()){
 				
@@ -147,7 +181,11 @@ public class Station {
 	}
 	
 	private void synchronizePLCS() {
-		
+		if (standBy.isEmpty()) {
+			System.out.println("\nSincronizando con PLCs (" + plcs.size() + " conectados)   " + LocalDateTime.now());
+		} else {
+			System.out.println("\nSincronizando con PLCs (" + plcs.size() + " conectados - " + standBy.size() + " desconectados)\t" + LocalDateTime.now());
+		}
 		for (PLC p : plcs) {
 			
 			try {
@@ -157,7 +195,7 @@ public class Station {
 				CloudSocketConnection.getInstance().deletePLC(p);
 				standBy.add(p);
 				
-				System.out.println("Se ha perdido la conexión con el PLC con id " + p.getId() + ". Razón: " + ce.getMessage() + "\n");
+				System.err.println("Se ha perdido la conexión con el PLC con id " + p.getId() + ". Razón: " + ce.getMessage() + "\n");
 			}catch (Exception e){
 				
 				if(e.getMessage().equalsIgnoreCase("DELETE PLC")) {
@@ -181,6 +219,15 @@ public class Station {
 	
 	
 	private void reconnectStandBy() {
+		if (standByCount < STAND_BY_TOTAL_COUNT) {
+			standByCount++;
+			if (PropertiesUtils.getDebugLog()) {
+				System.out.println("standByCount: " + standByCount + ". STAND_BY_TOTAL_COUNT: " + STAND_BY_TOTAL_COUNT);
+			}
+			return;
+		} else {
+			standByCount = 0;
+		}
 		
 		Iterator<PLC> iter = standBy.iterator();
 		
@@ -196,10 +243,10 @@ public class Station {
 				plcs.add(p);
 				iter.remove();
 				
-				System.out.println("Plc con id " + p.getId() + " reconectado.\n");
+				System.out.println("Plc con id " + p.getId() + " reconectado.");
 				
 		    }catch(ConnectException ce) {
-				System.out.println("Plc con id " + p.getId() + " continua offline.\n");
+				System.err.println("Plc con id " + p.getId() + " continua offline.");
 			} catch (Exception e){
 				
 				if(e.getMessage().equalsIgnoreCase("DELETE PLC")) {

@@ -22,6 +22,8 @@ public class PropertiesUtils {
 	private static String PLCWebServerURL = null;
 	private static String cantPLCS = null;
 	private static Boolean onlyLocal = null;
+	private static Boolean disabledLocal = null;
+	private static Boolean debugLog = null;
 	
 	public static String getLocalServerURL() {
 		if(localServerURL == null) {
@@ -116,9 +118,23 @@ public class PropertiesUtils {
 	
 	public static Boolean getOnlyLocal() {
 		if(onlyLocal == null) {
-			onlyLocal = readProperty("onlyLocal") == "1" ? true : false;
+			onlyLocal = readProperty("onlyLocal").equals("1") ? true : false;
 		}
 		return onlyLocal;
+	}
+	
+	public static Boolean getDisabledLocal() {
+		if(disabledLocal == null) {
+			disabledLocal = readProperty("disabledLocal").equals("1") ? true : false;
+		}
+		return disabledLocal;
+	}
+
+	public static Boolean getDebugLog() {
+		if(debugLog == null) {
+			debugLog = readProperty("debugLog").equals("1") ? true : false;
+		}
+		return debugLog;
 	}
 	
 	

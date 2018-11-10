@@ -99,7 +99,9 @@ public class NetConnection {
 		conn.setRequestProperty("User-Agent", USER_AGENT);
 		conn.setRequestProperty("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8");
 		conn.setRequestProperty("Accept-Language", "en-US,en;q=0.5");
-		System.out.println("Cookies: " + cookies);
+		if (PropertiesUtils.getDebugLog()) {
+			System.out.println("Cookies: " + cookies);
+		}
 		String cookie = "";
 		for (String c : cookies) {
 			cookie = cookie.concat(c + "; ");
@@ -338,7 +340,9 @@ public class NetConnection {
 	 *
 	 **/
 	public void editVarByCURL(String ip, String plcWebServerURL, String data) {
-		System.out.println("Cookies: " + cookies);
+		if (PropertiesUtils.getDebugLog()) {
+			System.out.println("Cookies: " + cookies);
+		}
 		String cookie = "";
 		for (String c : cookies) {
 			cookie = cookie.concat(c + "; ");
